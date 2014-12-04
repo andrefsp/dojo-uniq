@@ -6,14 +6,9 @@ import argparse
 import sys
 
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-#parser.add_argument('-d',)
-#parser.add_argument('-c',)
-#parser.add_argument('-f',)
-#parser.add_argument('-u',)
-#parser.add_argument('-s',)
-parser.add_argument('-i',)
-
+parser = argparse.ArgumentParser(description='Worker out uniqueness')
+parser.add_argument('-d',  dest='delimiter', metavar='D', type=str,
+                    default=',', help='case insensitive output')
 
 uniques = Counter()
 
@@ -43,6 +38,17 @@ class DecimalPlacesComparaison(Comparaison):
 
         return parts(value1) == parts(value2)
 
+class LineGenerator(object):
+
+    def __init__(self, options, filehandle=None):
+        self.options = options
+        self.filehandle = filehandle if filehandle is not None else sys.stdin
+
+    def __iter__(self):
+        for line in self.filehandle:
+            yield line.split(self.options.delimiter)
+
+
 if __name__ == "__main__":
     if "test" in sys.argv:
         d = DecimalPlacesComparaison(2)
@@ -50,13 +56,13 @@ if __name__ == "__main__":
         assert not d.cmp(3.14, 3.149)
         assert not d.cmp(2, 3)
 
-    
+    options = parser.parse_args()
     if sys.argv[1:]:
         for file_name in sys.argv[1:]:
             with open(file_name) as file_handle:
-                uniques.update(Counter(file_handle))
+                uniques.update(Counter(LineGenerator(file_handle)))
     else:
-        uniques.update(Counter(sys.stdin))
+        uniques.update(Counter(LineGenerator()))
     print uniques.most_common()
 
 
