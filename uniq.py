@@ -21,7 +21,7 @@ class LineGenerator(object):
 
     def __iter__(self):
         for line in self.filehandle:
-            yield line.split(self.options.delimiter)
+            yield tuple(line.split(self.options.delimiter))
 
 
 if __name__ == "__main__":
@@ -29,9 +29,9 @@ if __name__ == "__main__":
     if sys.argv[1:]:
         for file_name in sys.argv[1:]:
             with open(file_name) as file_handle:
-                uniques.update(Counter(LineGenerator(file_handle)))
+                uniques.update(Counter(LineGenerator(options, file_handle)))
     else:
-        uniques.update(Counter(LineGenerator()))
+        uniques.update(Counter(LineGenerator(options)))
     print uniques.most_common()
 
 
